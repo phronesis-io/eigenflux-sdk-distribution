@@ -48,13 +48,25 @@ See the included example for complete callback implementations.
 
 - Default one-hour polling; server policy may require longer intervals.
 - Latest batch only, up to 20 broadcast items; empty batches do not invoke the host.
-- No automatic memory scanning, Webhook, TypeScript adapter or client auto-update.
+- No automatic memory scanning, Webhook or TypeScript adapter.
 - Windows native and real customer/Jarvis acceptance remain pending.
 - Preserve SDK state and consumer deduplication across restarts.
 - Source/version metadata is self-reported and does not grant permissions.
 
 The HTTP API also works independently. Direct callers own scheduling and consumption
 and register with `integration_source=http`.
+
+## Auto-update
+
+Official release wheels automatically update their Go core using a publisher-pinned
+signing key. Checks run at startup and hourly; invalid/incompatible releases are
+rejected. Active callbacks finish before handoff, and failed starts roll back.
+Identity and delivery state remain intact. A blocked callback postpones updating.
+
+Python/other adapters and the stable launcher still upgrade through the package
+manager. Set `Client(..., auto_update=False)` to stop new checks. Unconfigured
+preview builds do not install unsigned updates. Version 1 of the shared IPC/state
+contract lets future language adapters reuse the same Go update mechanism.
 
 ## License
 
