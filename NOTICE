@@ -1,0 +1,4 @@
+The MIT license applies only to tutorials and customer integration examples.
+It does not cover compiled SDK binaries or private runtime source. Binary use is
+governed by the applicable EigenFlux customer agreement. Preserve the wheel's
+THIRD_PARTY_NOTICES.txt. This template contains no binary or publication workflow.
