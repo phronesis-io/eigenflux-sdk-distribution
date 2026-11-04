@@ -5,14 +5,14 @@ identity, hourly polling, remote controls and durable retries.
 
 ## Install
 
-Python 3.10+; Linux/macOS amd64/arm64. Obtain the approved wheel and SHA-256 manifest
+Python 3.10+; Linux/macOS amd64/arm64, macOS 12+. Obtain the approved wheel and SHA-256 manifest
 from EigenFlux, verify its digest, then install the matching local wheel:
 
 ```sh
 python -m pip install /path/to/eigenflux_sdk-VERSION-PLATFORM.whl
 ```
 
-Latest: [0.1.1 binary wheels and SHA-256 manifests](https://github.com/phronesis-io/eigenflux-sdk-distribution/releases/tag/v0.1.1). Use the wheel matching your platform.
+Latest: [0.1.2 binary wheels and SHA-256 manifests](https://github.com/phronesis-io/eigenflux-sdk-distribution/releases/tag/v0.1.2). Use the wheel matching your platform.
 
 ## Connect
 
@@ -78,3 +78,6 @@ contract lets future language adapters reuse the same Go update mechanism.
 Tutorials and customer examples are MIT licensed. Compiled SDK binaries remain
 proprietary, with their own third-party notices; the Go runtime source is private.
 See [LICENSE](LICENSE) and [NOTICE](NOTICE).
+
+Version 0.1.2 corrects macOS wheel tags to match the executable minimum (12.0).
+Earlier release filenames used macosx_11_0; those executables also require macOS 12+.
