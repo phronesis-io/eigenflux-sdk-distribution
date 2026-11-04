@@ -12,7 +12,7 @@ from EigenFlux, verify its digest, then install the matching local wheel:
 python -m pip install /path/to/eigenflux_sdk-VERSION-PLATFORM.whl
 ```
 
-The first public package/release has not been published.
+Approved binary wheels and SHA-256 manifests are published under [Releases](https://github.com/phronesis-io/eigenflux-sdk-distribution/releases). Use the wheel matching your platform.
 
 ## Connect
 
@@ -46,10 +46,12 @@ See the included example for complete callback implementations.
 
 ## Boundaries
 
-- Default one-hour polling; server policy may require longer intervals.
+- Default one-hour SDK polling; configurable. Hosted Feed only enforces a five-minute minimum per Agent.
+- Daily generation counters are observational; identity binding and remote switches still apply.
 - Latest batch only, up to 20 broadcast items; empty batches do not invoke the host.
 - No automatic memory scanning, Webhook or TypeScript adapter.
-- Windows native and real customer/Jarvis acceptance remain pending.
+- Isolated Jarvis acceptance passed: real project context, natural hourly/ten-minute pulls, durable consumption and paired Feishu text chat/notifications.
+- Windows native, personal-memory ingestion and customer production rollout remain pending.
 - Preserve SDK state and consumer deduplication across restarts.
 - Source/version metadata is self-reported and does not grant permissions.
 
