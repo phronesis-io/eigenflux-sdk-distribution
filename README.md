@@ -12,7 +12,7 @@ from EigenFlux, verify its digest, then install the matching local wheel:
 python -m pip install /path/to/eigenflux_sdk-VERSION-PLATFORM.whl
 ```
 
-Approved binary wheels and SHA-256 manifests are published under [Releases](https://github.com/phronesis-io/eigenflux-sdk-distribution/releases). Use the wheel matching your platform.
+Latest: [0.1.1 binary wheels and SHA-256 manifests](https://github.com/phronesis-io/eigenflux-sdk-distribution/releases/tag/v0.1.1). Use the wheel matching your platform.
 
 ## Connect
 
@@ -64,6 +64,9 @@ Official release wheels automatically update their Go core using a publisher-pin
 signing key. Checks run at startup and hourly; invalid/incompatible releases are
 rejected. Active callbacks finish before handoff, and failed starts roll back.
 Identity and delivery state remain intact. A blocked callback postpones updating.
+Real HTTPS upgrade from 0.1.0 to 0.1.1 and isolated startup-failure rollback have
+passed acceptance. Official wheels consult only `sdk-stable`; acceptance-only
+prereleases are not installation packages.
 
 Python/other adapters and the stable launcher still upgrade through the package
 manager. Set `Client(..., auto_update=False)` to stop new checks. Unconfigured
