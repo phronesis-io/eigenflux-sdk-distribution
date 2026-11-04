@@ -1,0 +1,23 @@
+name: Distribution checks
+on: [pull_request, push]
+permissions:
+  contents: read
+jobs:
+  tutorial:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m compileall -q examples
+      - run: python -m json.tool examples/context.json > /dev/null
+      - run: git diff --check
+      - name: Keep private runtime source out of distribution
+        run: |
+          python - <<'PY'
+          import subprocess
+          names = subprocess.check_output(['git', 'ls-files'], text=True).splitlines()
+          assert not any(name.endswith(('.go', '.pem', '.key', '.whl')) for name in names), names
+          assert not any(name.startswith(('internal/', 'cmd/', 'private/', 'secrets/')) for name in names), names
+          PY
