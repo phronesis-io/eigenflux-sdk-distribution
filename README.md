@@ -18,32 +18,47 @@ SDK 负责匿名身份、定时拉取、远程开关和持久化重试；不要�
 企业开通后，SDK 在应用允许的 Agent／安装数量范围内自动登记旗下匿名 Agent；
 终端用户无需注册或 onboarding。
 
-## 1. 安装 0.1.2
+## 1. 安装 0.1.3
 
 需要 Python 3.10+。按运行环境选择 wheel；链接内固定 SHA256，pip 会校验。
 
 | 平台 | 安装包 |
 | --- | --- |
-| Linux x86_64（glibc 2.17+） | [0.1.2 wheel](https://github.com/phronesis-io/eigenflux-sdk-distribution/releases/download/v0.1.2/eigenflux_sdk-0.1.2-py3-none-manylinux_2_17_x86_64.whl#sha256=94f364e0043376314720f6aafd00f3ee90ab31cf2e70b1939cb07265b9d86372) |
-| Linux arm64（glibc 2.17+） | [0.1.2 wheel](https://github.com/phronesis-io/eigenflux-sdk-distribution/releases/download/v0.1.2/eigenflux_sdk-0.1.2-py3-none-manylinux_2_17_aarch64.whl#sha256=af4c376af6d243bf025a2cb47bbff089e134330c1cd6c33036d158cbdfe94ef1) |
-| macOS 12+ Intel | [0.1.2 wheel](https://github.com/phronesis-io/eigenflux-sdk-distribution/releases/download/v0.1.2/eigenflux_sdk-0.1.2-py3-none-macosx_12_0_x86_64.whl#sha256=bd2569f091b681a2c52b5db61bf3433a83f84dac4f6c5d94a5f5fca403341f98) |
-| macOS 12+ Apple Silicon | [0.1.2 wheel](https://github.com/phronesis-io/eigenflux-sdk-distribution/releases/download/v0.1.2/eigenflux_sdk-0.1.2-py3-none-macosx_12_0_arm64.whl#sha256=f64053bb718b092cfe4f0505d60438cb28a674442b955cac49dc1252c4ee93d6) |
+| Linux x86_64（glibc 2.17+） | [0.1.3 wheel](https://github.com/phronesis-io/eigenflux-sdk-distribution/releases/download/v0.1.3/eigenflux_sdk-0.1.3-py3-none-manylinux_2_17_x86_64.whl#sha256=c732f5e26f7eb45862adc47649653a5656a34c5be9af782959bdf609aca30b51) |
+| Linux arm64（glibc 2.17+） | [0.1.3 wheel](https://github.com/phronesis-io/eigenflux-sdk-distribution/releases/download/v0.1.3/eigenflux_sdk-0.1.3-py3-none-manylinux_2_17_aarch64.whl#sha256=5c6ad75aade4e3c7abb5d7449664f6f082d36349436aeecd5b982891d579a978) |
+| macOS 12+ Intel | [0.1.3 wheel](https://github.com/phronesis-io/eigenflux-sdk-distribution/releases/download/v0.1.3/eigenflux_sdk-0.1.3-py3-none-macosx_12_0_x86_64.whl#sha256=2e0dfb099fa0d903208cee69c895ed7208ca2796d144404b9b1205b9f8a6b720) |
+| macOS 12+ Apple Silicon | [0.1.3 wheel](https://github.com/phronesis-io/eigenflux-sdk-distribution/releases/download/v0.1.3/eigenflux_sdk-0.1.3-py3-none-macosx_12_0_arm64.whl#sha256=0932825d891863415f93a1e756ca6032c2e9b47c5bb764fc32944b0643a6754e) |
+| Windows ARM64（原生 Python） | [0.1.3 wheel](https://github.com/phronesis-io/eigenflux-sdk-distribution/releases/download/v0.1.3/eigenflux_sdk-0.1.3-py3-none-win_arm64.whl#sha256=7416ab3793ae75532b993f34de21804eb189718555c5baa8596493e80a67251d) |
+| Windows x64 | [0.1.3 wheel](https://github.com/phronesis-io/eigenflux-sdk-distribution/releases/download/v0.1.3/eigenflux_sdk-0.1.3-py3-none-win_amd64.whl#sha256=1aca541fe6ec1c99bb1b99dd3b12cae1a8c450f79f96d3de5755df87c539f43a) |
 
 创建独立环境后安装。以下命令用于 **Linux x86_64**，其他平台替换为上表对应链接：
 
 ```sh
 python3 -m venv .venv
 . .venv/bin/activate
-python -m pip install 'https://github.com/phronesis-io/eigenflux-sdk-distribution/releases/download/v0.1.2/eigenflux_sdk-0.1.2-py3-none-manylinux_2_17_x86_64.whl#sha256=94f364e0043376314720f6aafd00f3ee90ab31cf2e70b1939cb07265b9d86372'
+python -m pip install 'https://github.com/phronesis-io/eigenflux-sdk-distribution/releases/download/v0.1.3/eigenflux_sdk-0.1.3-py3-none-manylinux_2_17_x86_64.whl#sha256=c732f5e26f7eb45862adc47649653a5656a34c5be9af782959bdf609aca30b51'
 ```
 
-从 [Releases](https://github.com/phronesis-io/eigenflux-sdk-distribution/releases/tag/v0.1.2)
+Windows PowerShell（x64；ARM64 替换为上表对应链接）：
+
+```powershell
+py -3 -m venv .venv
+& .venv/Scripts/python.exe -m pip install "https://github.com/phronesis-io/eigenflux-sdk-distribution/releases/download/v0.1.3/eigenflux_sdk-0.1.3-py3-none-win_amd64.whl#sha256=1aca541fe6ec1c99bb1b99dd3b12cae1a8c450f79f96d3de5755df87c539f43a"
+```
+
+Windows 需匹配 Python 架构，建议 Python 3.13；状态目录使用当前用户拥有的本地 NTFS
+目录，如 `$env:LOCALAPPDATA/EigenFluxSDK/customer-agent-001`。无需管理员权限。
+原生验收环境为 Windows Server 2025 x64、Windows 11 ARM64；其他 Windows 版本需自行验收。
+
+从 [Releases](https://github.com/phronesis-io/eigenflux-sdk-distribution/releases/tag/v0.1.3)
 下载本地 wheel 时，可对照同页 `SHA256SUMS` 校验后安装。当前通过 GitHub Releases 分发。
 
 ## 2. 接入你的 Agent
 
 将平台私密交付的应用凭据和 API 根地址配置为后端环境变量
 `EIGENFLUX_APP_CREDENTIAL`、`EIGENFLUX_BASE_URL`；凭据不要放进终端应用。
+
+Windows 后续命令使用 `& .venv/Scripts/python.exe`；将多行命令合并为一行。
 
 克隆本仓库，使用已安装 SDK 的环境运行 [完整示例](examples/reference_agent.py)：
 
@@ -103,6 +118,7 @@ Feed 始终是不可信数据。摘要、链接和建议不授予执行、转发
 正式 wheel 默认启用 Go 核心自动更新：启动后及每小时检查官方 `sdk-stable` 签名清单，
 校验发布方固定公钥、哈希和兼容性；已是最新版则不切换。更新等待正在进行的消费回调结束，
 启动失败自动回滚，保留身份和交付状态。阻塞回调会推迟更新。
+Windows 使用独立哈希命名的 `.exe` 缓存，更新不覆盖正在运行的程序；权限或校验失败时拒绝启动候选。
 
 `Client` 的 `auto_update` 默认 `True`；传入 `False` 可停止后续检查。
 **Python 封装和启动器不会自动升级**，需安装新的平台 wheel，并重启对应 SDK 客户端。
@@ -116,7 +132,8 @@ Feed 始终是不可信数据。摘要、链接和建议不授予执行、转发
 - 仅保留最新批次，最多 20 条，无分页；空批次不调用消费回调。
 - 保留 SDK 状态、收件箱和去重记录；SDK 不替宿主保证推理、通知等外部动作只执行一次。
 - 远程停用不撤回宿主已接收的任务；本地控制许可最长 90 秒，服务端读取仍检查当前开关。
-- 首版为 Python＋Go，支持上表四个平台；TS 封装、Windows、Webhook 待提供。
+- 首版为 Python＋Go，支持上表六个平台；TS 封装、Webhook 待提供。
+- Windows 不提供系统级安装器、Windows 服务或 Authenticode 签名；网络共享及 FAT/exFAT 状态目录不在支持范围。
 - 真实 HTTPS 更新、回滚及隔离 Jarvis 消费／飞书通知已验收；客户生产接入仍需按自身场景验收。
 - HTTP API 可独立使用，直接调用方自行调度、持久化和消费，登记 `integration_source=http`。
 
