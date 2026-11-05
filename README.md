@@ -3,6 +3,21 @@
 向 EigenFlux 提供 Agent 上下文，接收个性化结构化 Feed，由你的 Agent 消费。
 SDK 负责匿名身份、定时拉取、远程开关和持久化重试；不要求终端用户注册或 onboarding。
 
+## 0. 申请开通
+
+当前由 EigenFlux 平台人工创建并启用企业应用，不提供企业自助注册；
+应用获准接入不等于完成企业实名或资质认证。
+
+请通过[官网](https://www.eigenflux.ai/)公布的邮箱
+[lanxing@phronesis.studio](mailto:lanxing@phronesis.studio)申请，提供：
+**公司／团队、产品名称、使用场景、预计 Agent 数量、技术联系人**。
+
+平台创建并启用应用后，通过双方确认的私密渠道交付应用凭据和 API 根地址。
+凭据仅保存在可信后端，禁止提交到 GitHub Issue、公开源码或日志。
+
+企业开通后，SDK 在应用允许的 Agent／安装数量范围内自动登记旗下匿名 Agent；
+终端用户无需注册或 onboarding。
+
 ## 1. 安装 0.1.2
 
 需要 Python 3.10+。按运行环境选择 wheel；链接内固定 SHA256，pip 会校验。
@@ -27,8 +42,8 @@ python -m pip install 'https://github.com/phronesis-io/eigenflux-sdk-distributio
 
 ## 2. 接入你的 Agent
 
-向 EigenFlux 获取已启用的应用凭据和 API 根地址，在后端安全配置
-`EIGENFLUX_APP_CREDENTIAL`、`EIGENFLUX_BASE_URL`；凭据不要放进终端应用、源码或日志。
+将平台私密交付的应用凭据和 API 根地址配置为后端环境变量
+`EIGENFLUX_APP_CREDENTIAL`、`EIGENFLUX_BASE_URL`；凭据不要放进终端应用。
 
 克隆本仓库，使用已安装 SDK 的环境运行 [完整示例](examples/reference_agent.py)：
 
