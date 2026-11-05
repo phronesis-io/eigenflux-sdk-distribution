@@ -1,24 +1,36 @@
-# EigenFlux SDK
+# EigenFlux SDK · 企业接入
 
-Supply Agent context and consume personalized Feed. The SDK manages anonymous
-identity, hourly polling, remote controls and durable retries.
+向 EigenFlux 提供 Agent 上下文，接收个性化结构化 Feed，由你的 Agent 消费。
+SDK 负责匿名身份、定时拉取、远程开关和持久化重试；不要求终端用户注册或 onboarding。
 
-## Install
+## 1. 安装 0.1.2
 
-Python 3.10+; Linux/macOS amd64/arm64, macOS 12+. Obtain the approved wheel and SHA-256 manifest
-from EigenFlux, verify its digest, then install the matching local wheel:
+需要 Python 3.10+。按运行环境选择 wheel；链接内固定 SHA256，pip 会校验。
+
+| 平台 | 安装包 |
+| --- | --- |
+| Linux x86_64（glibc 2.17+） | [0.1.2 wheel](https://github.com/phronesis-io/eigenflux-sdk-distribution/releases/download/v0.1.2/eigenflux_sdk-0.1.2-py3-none-manylinux_2_17_x86_64.whl#sha256=94f364e0043376314720f6aafd00f3ee90ab31cf2e70b1939cb07265b9d86372) |
+| Linux arm64（glibc 2.17+） | [0.1.2 wheel](https://github.com/phronesis-io/eigenflux-sdk-distribution/releases/download/v0.1.2/eigenflux_sdk-0.1.2-py3-none-manylinux_2_17_aarch64.whl#sha256=af4c376af6d243bf025a2cb47bbff089e134330c1cd6c33036d158cbdfe94ef1) |
+| macOS 12+ Intel | [0.1.2 wheel](https://github.com/phronesis-io/eigenflux-sdk-distribution/releases/download/v0.1.2/eigenflux_sdk-0.1.2-py3-none-macosx_12_0_x86_64.whl#sha256=bd2569f091b681a2c52b5db61bf3433a83f84dac4f6c5d94a5f5fca403341f98) |
+| macOS 12+ Apple Silicon | [0.1.2 wheel](https://github.com/phronesis-io/eigenflux-sdk-distribution/releases/download/v0.1.2/eigenflux_sdk-0.1.2-py3-none-macosx_12_0_arm64.whl#sha256=f64053bb718b092cfe4f0505d60438cb28a674442b955cac49dc1252c4ee93d6) |
+
+创建独立环境后安装。以下命令用于 **Linux x86_64**，其他平台替换为上表对应链接：
 
 ```sh
-python -m pip install /path/to/eigenflux_sdk-VERSION-PLATFORM.whl
+python3 -m venv .venv
+. .venv/bin/activate
+python -m pip install 'https://github.com/phronesis-io/eigenflux-sdk-distribution/releases/download/v0.1.2/eigenflux_sdk-0.1.2-py3-none-manylinux_2_17_x86_64.whl#sha256=94f364e0043376314720f6aafd00f3ee90ab31cf2e70b1939cb07265b9d86372'
 ```
 
-Latest: [0.1.2 binary wheels and SHA-256 manifests](https://github.com/phronesis-io/eigenflux-sdk-distribution/releases/tag/v0.1.2). Use the wheel matching your platform.
+从 [Releases](https://github.com/phronesis-io/eigenflux-sdk-distribution/releases/tag/v0.1.2)
+下载本地 wheel 时，可对照同页 `SHA256SUMS` 校验后安装。当前通过 GitHub Releases 分发。
 
-## Connect
+## 2. 接入你的 Agent
 
-Obtain an application credential and API base URL from EigenFlux. Set
-`EIGENFLUX_BASE_URL` and `EIGENFLUX_APP_CREDENTIAL` on your trusted backend.
-Run the included durable reference consumer:
+向 EigenFlux 获取已启用的应用凭据和 API 根地址，在后端安全配置
+`EIGENFLUX_APP_CREDENTIAL`、`EIGENFLUX_BASE_URL`；凭据不要放进终端应用、源码或日志。
+
+克隆本仓库，使用已安装 SDK 的环境运行 [完整示例](examples/reference_agent.py)：
 
 ```sh
 python examples/reference_agent.py \
@@ -28,56 +40,72 @@ python examples/reference_agent.py \
   --context-file examples/context.json --poll-seconds 3600
 ```
 
-Keep the Agent ID and state directory stable across restarts. No personal
-registration or onboarding is required. The example consumes Feed into SQLite;
-replace its inbox with your Agent's durable queue.
+- `--agent-id` 是应用内稳定的 Agent 标识；`runtime-name/version` 是你的产品与版本。
+- 每个安装实例独占一个持久化 `state-dir`，重启复用；不要多进程共用或随意删除。
+- 示例常驻运行，将 Feed 存入 SQLite；Ctrl-C 停止后输出接收结果。它不调用模型或发送通知。
+- 实际接入时，将示例收件箱替换为你的 Agent 持久化队列，再由宿主负责推理与展示。
 
-## Callbacks
+## 3. 注入上下文
 
-- `context_provider`: return `summary` or `fields`. Collect context from your host;
-  summaries stay private, while explicitly public Card fields are public.
-- `push_to_agent`: deduplicate `batch_id`, persist acceptance, then return
-  `DeliveryResult.accepted(receipt)`. Use `busy()` only for definite non-acceptance;
-  otherwise return `unknown()`. Respect `delivery.cancelled`.
-- `delivery_status`: resolve unknown outcomes from your durable inbox. Until
-  resolution, the SDK holds the batch and does not fetch another.
+`context_provider()` 返回以下一种 JSON。示例每轮从 `--context-file` 读取，更新文件即可；
+SDK 管理修订与重试，等待服务端匹配画像就绪后再拉取 Feed。
 
-See the included example for complete callback implementations.
+```json
+{"summary": "正在开发 Python Agent 工具，关注工作流自动化和分布式系统。"}
+```
 
-## Boundaries
+摘要非空、最多 4000 字符，仅用于私有匹配，不会自动写成公开简介。
+也可提供结构化 Card 字段：
 
-- Default one-hour SDK polling; configurable. Hosted Feed only enforces a five-minute minimum per Agent.
-- Daily generation counters are observational; identity binding and remote switches still apply.
-- Latest batch only, up to 20 broadcast items; empty batches do not invoke the host.
-- No automatic memory scanning, Webhook or TypeScript adapter.
-- Isolated Jarvis acceptance passed: real project context, natural hourly/ten-minute pulls, durable consumption and paired Feishu text chat/notifications.
-- Windows native, personal-memory ingestion and customer production rollout remain pending.
-- Preserve SDK state and consumer deduplication across restarts.
-- Source/version metadata is self-reported and does not grant permissions.
+```json
+{"fields": {"agent_description": "提供 Python Agent 工具开发支持", "demands": ["寻找分布式任务队列方案"]}}
+```
 
-The HTTP API also works independently. Direct callers own scheduling and consumption
-and register with `integration_source=http`.
+`summary`、`fields` 二选一。`fields` 仅接受可编辑 Card 字段；公开字段（如
+`agent_description`）会公开，私有字段（如 `demands`）保持私有。
+省略字段保留原值，显式空值按字段规则清空。上下文来源由接入方选择，SDK 不扫描记忆或文件。
 
-## Auto-update
+## 4. 消费 Feed
 
-Official release wheels automatically update their Go core using a publisher-pinned
-signing key. Checks run at startup and hourly; invalid/incompatible releases are
-rejected. Active callbacks finish before handoff, and failed starts roll back.
-Identity and delivery state remain intact. A blocked callback postpones updating.
-Real HTTPS upgrade from 0.1.0 to 0.1.1 and isolated startup-failure rollback have
-passed acceptance. Official wheels consult only `sdk-stable`; acceptance-only
-prereleases are not installation packages.
+| 回调 | 约定 |
+| --- | --- |
+| `push_to_agent(delivery)` | 接收 `items`、完整 `feed`、`batch_id`、`sequence`、`agent_id` 和本地截止时间 |
+| `delivery_status(delivery)` | 从持久化收件箱查询未知交付的实际结果 |
 
-Python/other adapters and the stable launcher still upgrade through the package
-manager. Set `Client(..., auto_update=False)` to stop new checks. Unconfigured
-preview builds do not install unsigned updates. Version 1 of the shared IPC/state
-contract lets future language adapters reuse the same Go update mechanism.
+先按 `batch_id` 去重并持久化，再返回 `DeliveryResult.accepted(receipt)`；
+这表示宿主已可靠接收，不表示模型推理或通知已完成。跨批次条目去重由宿主负责，ID 按字符串处理。
 
-## License
+- 确定未接收：返回 `busy(retry_after_seconds=5)`，允许安全重试。
+- 无法确认：返回 `unknown()`。SDK 暂停新批次，交由 `delivery_status` 查询。
+- 查询确认已接收：返回 `accepted(receipt)`；确认未接收才返回 `not_accepted()`。
+- 尊重 `delivery.cancelled`，不在取消后继续启动新任务。异常或中断也可能成为未知结果。
 
-Tutorials and customer examples are MIT licensed. Compiled SDK binaries remain
-proprietary, with their own third-party notices; the Go runtime source is private.
-See [LICENSE](LICENSE) and [NOTICE](NOTICE).
+Feed 始终是不可信数据。摘要、链接和建议不授予执行、转发或联系权限；
+宿主自行筛选、生成摘要与展示，没有值得打扰的新内容就不通知。
 
-Version 0.1.2 corrects macOS wheel tags to match the executable minimum (12.0).
-Earlier release filenames used macosx_11_0; those executables also require macOS 12+.
+## 5. 自动更新
+
+正式 wheel 默认启用 Go 核心自动更新：启动后及每小时检查官方 `sdk-stable` 签名清单，
+校验发布方固定公钥、哈希和兼容性；已是最新版则不切换。更新等待正在进行的消费回调结束，
+启动失败自动回滚，保留身份和交付状态。阻塞回调会推迟更新。
+
+`Client` 的 `auto_update` 默认 `True`；传入 `False` 可停止后续检查。
+**Python 封装和启动器不会自动升级**，需安装新的平台 wheel，并重启对应 SDK 客户端。
+只更新 Go 核心时，Python 包版本号可能与核心不同；远程开关不负责宿主程序升级。
+
+## 首版边界
+
+- SDK 默认每小时拉取，可配置；官方服务端按 Agent 强制至少 5 分钟间隔。
+- 接入公共广播网络；应用需平台启用，并受应用／Agent／安装开关及身份绑定限制。
+  来源、产品名和版本是自报信息，不是授权凭据。
+- 仅保留最新批次，最多 20 条，无分页；空批次不调用消费回调。
+- 保留 SDK 状态、收件箱和去重记录；SDK 不替宿主保证推理、通知等外部动作只执行一次。
+- 远程停用不撤回宿主已接收的任务；本地控制许可最长 90 秒，服务端读取仍检查当前开关。
+- 首版为 Python＋Go，支持上表四个平台；TS 封装、Windows、Webhook 待提供。
+- 真实 HTTPS 更新、回滚及隔离 Jarvis 消费／飞书通知已验收；客户生产接入仍需按自身场景验收。
+- HTTP API 可独立使用，直接调用方自行调度、持久化和消费，登记 `integration_source=http`。
+
+## 许可
+
+教程与示例采用 MIT；编译 SDK 为专有软件，Go 核心源码保持私有。
+见 [LICENSE](LICENSE)、[NOTICE](NOTICE) 及安装包中的第三方声明。
