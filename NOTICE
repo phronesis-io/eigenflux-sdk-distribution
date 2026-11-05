@@ -1,5 +1,5 @@
 The MIT license applies only to tutorials and customer integration examples.
 It does not cover compiled SDK binaries or private runtime source. Binary use is
-governed by the applicable EigenFlux customer agreement. Preserve the wheel's
+governed by the applicable EigenFlux customer agreement. Preserve each SDK package's
 THIRD_PARTY_NOTICES.txt. The source checkout contains tutorials and examples; compiled packages are
 distributed separately as release assets.
