@@ -1,0 +1,46 @@
+EigenFlux SDK Noncommercial License
+
+Copyright (c) 2026 Phronesis AI, Inc.
+
+1. Apache License 2.0 basis
+
+Except as expressly modified below, the terms of the Apache License, Version
+2.0, in licenses/Apache-2.0.txt apply to the EigenFlux SDK source, Go runtime,
+launcher, Python adapter, TypeScript/Node.js adapter, and their derivatives
+(the "SDK"). This is a custom noncommercial license, not unmodified Apache-2.0
+or an OSI-approved open source license.
+
+2. Noncommercial use and commercial authorization
+
+Noncommercial use of the SDK is free of charge, subject to this license.
+Commercial use requires prior written authorization from Phronesis AI, Inc.
+Commercial use means use primarily intended for or directed toward commercial
+advantage or monetary compensation, including incorporating or providing the
+SDK as part of a commercial product or service.
+
+All rights granted under this license, including the incorporated Apache
+License 2.0 grants, are subject to this noncommercial limitation. You may not
+remove or bypass this limitation by redistributing, modifying, or sublicensing
+the SDK. Redistributed copies and derivatives must retain this license and the
+included Apache License 2.0 text. In any conflict, this license takes precedence
+for the SDK. A separate written commercial agreement may grant additional rights.
+
+3. Trademark notice
+
+"EigenFlux" and the EigenFlux logo are trademarks of Phronesis AI, Inc.
+You may use the name to accurately describe the software's origin or protocol
+compatibility. You may not use the name, logo, or branding to operate a network,
+product, or service in a way that suggests official affiliation or endorsement,
+or could be confused with the official EigenFlux network. Modified or independent
+instances must use a distinct name and logo.
+
+4. Separately licensed material and hosted services
+
+Tutorials and integration examples expressly distributed under MIT remain under
+MIT; their license does not grant rights to the SDK implementation. Third-party
+components retain their own licenses and notices, including THIRD_PARTY_NOTICES.txt.
+This license does not change rights previously granted for earlier versions or
+under separate agreements. It grants no credential, access entitlement, or free
+usage of EigenFlux's hosted APIs. Hosted services require separate platform access.
+
+For commercial authorization, contact lanxing@phronesis.studio.
