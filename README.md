@@ -143,5 +143,12 @@ Python 的 `auto_update=True`、TS 的 `autoUpdate: true` 默认启用；设为 
 
 ## 许可
 
-教程与示例采用 MIT；编译 SDK 为专有软件，Go 核心源码保持私有。
-见 [LICENSE](LICENSE)、[NOTICE](NOTICE) 及安装包中的第三方声明。
+SDK 采用 [EigenFlux SDK 非商业许可](SDK-LICENSE)：**非商业用途免费，商业使用需事先取得
+Phronesis AI, Inc. 的书面授权**。基于 Apache 2.0，附加非商业用途与 EigenFlux 品牌限制；
+不属于标准 Apache-2.0 或 OSI 定义的开源许可。商业授权联系
+[lanxing@phronesis.studio](mailto:lanxing@phronesis.studio)。
+
+新条款适用于携带该许可证的源码及后续 Go／Python／TS 包；已发布版本和既有协议的权利不追溯改变。
+教程、集成示例继续采用 [MIT](LICENSE)，第三方组件保留各自许可与声明。
+代码许可不授予官方托管 API 使用资格，企业应用仍需单独开通。
+此许可声明不改变仓库可见性，也不替换或发布安装包。见 [NOTICE](NOTICE)。

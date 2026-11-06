@@ -1,5 +1,8 @@
-The MIT license applies only to tutorials and customer integration examples.
-It does not cover compiled SDK binaries or private runtime source. Binary use is
-governed by the applicable EigenFlux customer agreement. Preserve each SDK package's
-THIRD_PARTY_NOTICES.txt. The source checkout contains tutorials and examples; compiled packages are
-distributed separately as release assets.
+The MIT license in LICENSE applies only to tutorials and integration examples.
+The EigenFlux SDK implementation, including Go core, launcher and Python/TS
+adapters, is governed by the license accompanying its version. SDK-LICENSE
+contains the new noncommercial terms for source and future packages carrying
+those terms: noncommercial use is free; commercial use requires prior written
+authorization from Phronesis AI, Inc. Previously published packages and separate
+agreements are unchanged. Preserve all third-party licenses and notices.
+This documentation change does not publish source or replace release assets.
