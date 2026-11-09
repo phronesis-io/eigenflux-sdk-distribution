@@ -1,10 +1,11 @@
 # Contributing
 
-Read LICENSE before contributing. Noncommercial use is free; commercial use
-requires prior written authorization. Preserve separately licensed MIT examples
-and all third-party notices. Contributions must be your own work or submitted
-with the necessary rights under the repository's applicable license; raise any
-separate contribution terms with maintainers before submitting.
+Tutorials and integration examples in this repository use the MIT LICENSE,
+including its commercial-use permissions. The separate SDK implementation terms
+are in SDK-LICENSE: noncommercial SDK use is free; commercial SDK use requires
+prior written authorization. Preserve all third-party notices. Submit contributions
+under the applicable license for the files you change, with the necessary rights;
+discuss separate contribution terms with maintainers before submitting.
 
 Create a feature branch or fork and open a pull request. Only repository
 administrators may merge after required CI passes. Direct pushes, force pushes

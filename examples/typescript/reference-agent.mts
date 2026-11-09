@@ -1,6 +1,6 @@
 /** MIT-licensed host integration. SDK use is governed by the accompanying noncommercial license. */
-import { chmodSync, readFileSync, realpathSync } from "node:fs";
-import { dirname, resolve } from "node:path";
+import { chmodSync, existsSync, readFileSync, realpathSync, writeFileSync } from "node:fs";
+import { resolve } from "node:path";
 import { DatabaseSync } from "node:sqlite";
 import { fileURLToPath } from "node:url";
 import { Client, DeliveryResult, type FeedDelivery } from "@phronesis-io/eigenflux-sdk";
@@ -96,14 +96,40 @@ export class ReferenceInbox {
   close(): void { this.database.close(); }
 }
 
-export async function main(): Promise<void> {
-  const baseUrl = process.env.EIGENFLUX_BASE_URL;
-  const appCredential = process.env.EIGENFLUX_APP_CREDENTIAL;
-  if (!baseUrl || !appCredential) throw new Error("private_application_configuration_required");
+/** Host-owned storage identity. Never guess a different file after an upgrade. */
+export function openReceiptStore(stateDir: string, inboxFile: string, stateExisted: boolean): ReferenceInbox {
+  const binding = resolve(stateDir, "host-receipt-store.json");
+  if (stateExisted && !existsSync(inboxFile)) throw new Error("existing_receipt_store_required");
+  const path = existsSync(inboxFile) ? realpathSync(inboxFile) : resolve(inboxFile);
+  if (existsSync(binding)) {
+    const saved = JSON.parse(readFileSync(binding, "utf8"));
+    if (saved.schema !== 1 || saved.path !== path) throw new Error("receipt_store_binding_mismatch");
+  }
+  const store = new ReferenceInbox(inboxFile);
+  try {
+    if (!existsSync(binding)) {
+      writeFileSync(binding, JSON.stringify({ schema: 1, path: realpathSync(inboxFile) }), { mode: 0o600, flag: "wx" });
+    }
+    return store;
+  } catch (error) { store.close(); throw error; }
+}
 
-  const contextFile = process.env.EXAMPLE_AGENT_CONTEXT_FILE
-    ?? resolve(dirname(fileURLToPath(import.meta.url)), "context.json");
-  const stateDir = resolve(process.env.EXAMPLE_AGENT_STATE_DIR ?? "data/reference-agent-sdk");
+export async function main(): Promise<void> {
+  const required = (name: string): string => {
+    const value = process.env[name]?.trim();
+    if (!value) throw new Error("explicit_agent_configuration_required");
+    return value;
+  };
+  const baseUrl = required("EIGENFLUX_BASE_URL");
+  const appCredential = required("EIGENFLUX_APP_CREDENTIAL");
+  const contextFile = resolve(required("EXAMPLE_AGENT_CONTEXT_FILE"));
+  const stateDir = resolve(required("EXAMPLE_AGENT_STATE_DIR"));
+  const inboxFile = resolve(required("EXAMPLE_AGENT_INBOX_FILE"));
+  const externalAgentId = required("EXAMPLE_AGENT_ID");
+  const runtimeName = required("EXAMPLE_AGENT_PRODUCT_NAME");
+  const runtimeVersion = required("EXAMPLE_AGENT_PRODUCT_VERSION");
+  const stateExisted = existsSync(resolve(stateDir, "state.json"));
+  if (stateExisted && !existsSync(inboxFile)) throw new Error("existing_receipt_store_required");
   let inbox: ReferenceInbox | undefined;
   let finish!: () => void;
   const stopped = new Promise<void>((done) => { finish = done; });
@@ -112,9 +138,9 @@ export async function main(): Promise<void> {
   const client = new Client({
     baseUrl,
     appCredential,
-    externalAgentId: process.env.EXAMPLE_AGENT_ID ?? "reference-agent-agent-001",
-    runtimeName: "reference-agent",
-    runtimeVersion: process.env.EXAMPLE_AGENT_PRODUCT_VERSION ?? "unknown",
+    externalAgentId,
+    runtimeName,
+    runtimeVersion,
     stateDir,
     feedPollIntervalSeconds: Number(process.env.EXAMPLE_AGENT_POLL_SECONDS ?? "3600"),
     autoUpdate: true,
@@ -133,7 +159,7 @@ export async function main(): Promise<void> {
     await Promise.race([client.waitUntilReady(30_000), stopped]);
     if (shuttingDown) return;
     // Go has now protected this directory with POSIX modes / a Windows DACL.
-    inbox = new ReferenceInbox(resolve(stateDir, "reference-agent-inbox.sqlite"));
+    inbox = openReceiptStore(stateDir, inboxFile, stateExisted);
     await Promise.race([client.waitUntilRegistered(60_000), stopped]);
     if (!shuttingDown) console.info("Example Agent is connected; accepted Feed is in the durable inbox.");
     await Promise.race([stopped, client.waitUntilStopped()]);

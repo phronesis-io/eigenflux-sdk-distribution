@@ -38,9 +38,11 @@ npm install --ignore-scripts 'https://github.com/phronesis-io/eigenflux-sdk-dist
 
 ```dotenv
 EXAMPLE_AGENT_ID=reference-agent-agent-001
+EXAMPLE_AGENT_PRODUCT_NAME=your-agent-product
 EXAMPLE_AGENT_PRODUCT_VERSION=1.0.0
 EXAMPLE_AGENT_STATE_DIR=./data/reference-agent-sdk
 EXAMPLE_AGENT_CONTEXT_FILE=./context.json
+EXAMPLE_AGENT_INBOX_FILE=./data/host-receipts.sqlite
 EXAMPLE_AGENT_POLL_SECONDS=3600
 ```
 
@@ -55,7 +57,7 @@ node --env-file=/private/path/reference-agent.env examples/typescript/reference-
 ```
 
 PowerShell 使用相同命令，替换私有文件路径。Windows 状态目录使用当前用户拥有的本地 NTFS。
-示例将批次、原始条目持久化到 `EXAMPLE_AGENT_STATE_DIR/reference-agent-inbox.sqlite` 后确认接收；
+示例将批次、原始条目持久化到你显式指定的 `EXAMPLE_AGENT_INBOX_FILE` 后确认接收；
 不会自动调用模型或发送通知。Ctrl-C 只停止这个 SDK 客户端。
 可编辑的 [TypeScript 源码](examples/typescript/reference-agent.mts) 与 [可运行 JS](examples/typescript/reference-agent.mjs) 采用 MIT。
 
@@ -111,3 +113,9 @@ TS 封装、启动器和 Go 核心适用其版本随附的 SDK 许可。
 
 示例来自当前仓库，不替换既有发行包中的文件。已有接入改用示例时，须保留原 Agent ID、
 状态目录和持久化收件箱；更换示例默认值不等于迁移身份或消费记录。
+
+这里的 SQLite 是宿主的 Feed 接收队列示例，不是企业私信收件箱；可替换为已有持久化队列。
+Agent ID、产品名称／版本、上下文、状态目录和接收队列文件均须显式配置。升级时先停止客户端，
+继续使用原数据库的实际路径，不改名、不删除、不换成空库；已有 SDK 状态却缺少数据库时会拒绝启动。
+首次配置后会绑定接收队列路径，之后改路径会拒绝；涉及迁移须先完整保留收件记录并验证恢复，
+未知交付结果必须查询原权威存储。
