@@ -30,17 +30,18 @@ npm install --ignore-scripts 'https://github.com/phronesis-io/eigenflux-sdk-dist
 包内含 JS、类型声明和两个原生程序，无运行时依赖，无安装脚本下载。
 若先下载本地归档，可对照同版 [SHA256SUMS](https://github.com/phronesis-io/eigenflux-sdk-distribution/releases/download/v0.1.4/SHA256SUMS) 校验后安装；保留项目锁文件。
 
-## Today AI 直接运行
+## 运行通用 Agent 示例
 
-将平台私密交付的 `EIGENFLUX_BASE_URL`、`EIGENFLUX_APP_CREDENTIAL` 保存到
-本机私有 `today-ai.env`。同一文件可配置：
+先将本仓库 `examples/typescript/` 复制到已安装 SDK 的后端项目中。
+示例不表示任何真实客户集成。将平台私密交付的 `EIGENFLUX_BASE_URL`、`EIGENFLUX_APP_CREDENTIAL` 保存到
+本机私有 `reference-agent.env`。同一文件可配置：
 
 ```dotenv
-TODAY_AI_AGENT_ID=today-ai-agent-001
-TODAY_AI_PRODUCT_VERSION=1.0.0
-TODAY_AI_STATE_DIR=./data/today-ai-sdk
-TODAY_AI_CONTEXT_FILE=./context.json
-TODAY_AI_POLL_SECONDS=3600
+EXAMPLE_AGENT_ID=reference-agent-agent-001
+EXAMPLE_AGENT_PRODUCT_VERSION=1.0.0
+EXAMPLE_AGENT_STATE_DIR=./data/reference-agent-sdk
+EXAMPLE_AGENT_CONTEXT_FILE=./context.json
+EXAMPLE_AGENT_POLL_SECONDS=3600
 ```
 
 `context.json` 写入你的 Agent 当前上下文：
@@ -50,13 +51,13 @@ TODAY_AI_POLL_SECONDS=3600
 ```
 
 ```sh
-node --env-file=/private/path/today-ai.env node_modules/@phronesis-io/eigenflux-sdk/examples/today-ai.mjs
+node --env-file=/private/path/reference-agent.env examples/typescript/reference-agent.mjs
 ```
 
 PowerShell 使用相同命令，替换私有文件路径。Windows 状态目录使用当前用户拥有的本地 NTFS。
-示例将批次、原始条目持久化到 `TODAY_AI_STATE_DIR/today-ai-inbox.sqlite` 后确认接收；
+示例将批次、原始条目持久化到 `EXAMPLE_AGENT_STATE_DIR/reference-agent-inbox.sqlite` 后确认接收；
 不会自动调用模型或发送通知。Ctrl-C 只停止这个 SDK 客户端。
-可编辑的 [TypeScript 源码](examples/typescript/today-ai.mts) 与 [可运行 JS](examples/typescript/today-ai.mjs) 采用 MIT。
+可编辑的 [TypeScript 源码](examples/typescript/reference-agent.mts) 与 [可运行 JS](examples/typescript/reference-agent.mjs) 采用 MIT。
 
 Agent ID 在应用内保持稳定；每个安装实例使用独占持久目录，重启复用，不与其他进程共享。
 上下文文件每轮读取，`summary` 与 `fields` 格式、公开范围见[上下文约定](README.md#3-注入上下文)。
@@ -65,7 +66,7 @@ SDK 不自动扫描 Agent 记忆；示例默认上下文仅作演示，接入方
 ## 接到实际 Agent
 
 导入 `Client`、`DeliveryResult`，支持 TypeScript、ESM 和 CommonJS。将示例的
-`TodayAIInbox` 替换为你的持久化任务队列和权威查询，随后由宿主异步推理、筛选与展示。
+`ReferenceInbox` 替换为你的持久化任务队列和权威查询，随后由宿主异步推理、筛选与展示。
 
 | `Client` 参数 | 用途 |
 | --- | --- |
@@ -107,3 +108,6 @@ TS 封装、启动器和 Go 核心适用其版本随附的 SDK 许可。
 商业授权联系 [lanxing@phronesis.studio](mailto:lanxing@phronesis.studio)。
 教程与示例保留 MIT，第三方许可不变；已发布包和既有协议不追溯改变。
 应用凭据与托管 API 使用资格仍需单独申请；许可文档不代表新包已发布。
+
+示例来自当前仓库，不替换既有发行包中的文件。已有接入改用示例时，须保留原 Agent ID、
+状态目录和持久化收件箱；更换示例默认值不等于迁移身份或消费记录。

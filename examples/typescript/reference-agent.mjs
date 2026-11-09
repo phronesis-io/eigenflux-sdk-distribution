@@ -1,11 +1,11 @@
-/** MIT-licensed host integration. SDK implementation and binaries are proprietary. */
+/** MIT-licensed host integration. SDK use is governed by the accompanying noncommercial license. */
 import { chmodSync, readFileSync, realpathSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { DatabaseSync } from "node:sqlite";
 import { fileURLToPath } from "node:url";
 import { Client, DeliveryResult } from "@phronesis-io/eigenflux-sdk";
-/** Replace this inbox with Today AI's durable queue when integrating its Agent. */
-export class TodayAIInbox {
+/** Replace this inbox with the host Agent's durable queue. */
+export class ReferenceInbox {
     database;
     tainted = false;
     constructor(path) {
@@ -55,7 +55,7 @@ export class TodayAIInbox {
                 transaction = false;
                 return DeliveryResult.busy(5);
             }
-            const receipt = `today-ai:${delivery.batchId}`;
+            const receipt = `reference-agent:${delivery.batchId}`;
             this.database.prepare("INSERT INTO batches VALUES(?,?,?,?)").run(delivery.batchId, String(delivery.sequence), receipt, JSON.stringify(delivery.feed));
             const insert = this.database.prepare("INSERT OR IGNORE INTO items VALUES(?,?,?)");
             for (const item of delivery.items) {
@@ -106,9 +106,9 @@ export async function main() {
     const appCredential = process.env.EIGENFLUX_APP_CREDENTIAL;
     if (!baseUrl || !appCredential)
         throw new Error("private_application_configuration_required");
-    const contextFile = process.env.TODAY_AI_CONTEXT_FILE
+    const contextFile = process.env.EXAMPLE_AGENT_CONTEXT_FILE
         ?? resolve(dirname(fileURLToPath(import.meta.url)), "context.json");
-    const stateDir = resolve(process.env.TODAY_AI_STATE_DIR ?? "data/today-ai-sdk");
+    const stateDir = resolve(process.env.EXAMPLE_AGENT_STATE_DIR ?? "data/reference-agent-sdk");
     let inbox;
     let finish;
     const stopped = new Promise((done) => { finish = done; });
@@ -117,11 +117,11 @@ export async function main() {
     const client = new Client({
         baseUrl,
         appCredential,
-        externalAgentId: process.env.TODAY_AI_AGENT_ID ?? "today-ai-agent-001",
-        runtimeName: "today-ai",
-        runtimeVersion: process.env.TODAY_AI_PRODUCT_VERSION ?? "unknown",
+        externalAgentId: process.env.EXAMPLE_AGENT_ID ?? "reference-agent-agent-001",
+        runtimeName: "reference-agent",
+        runtimeVersion: process.env.EXAMPLE_AGENT_PRODUCT_VERSION ?? "unknown",
         stateDir,
-        feedPollIntervalSeconds: Number(process.env.TODAY_AI_POLL_SECONDS ?? "3600"),
+        feedPollIntervalSeconds: Number(process.env.EXAMPLE_AGENT_POLL_SECONDS ?? "3600"),
         autoUpdate: true,
         contextProvider: () => JSON.parse(readFileSync(contextFile, "utf8")),
         pushToAgent: (delivery) => inbox?.accept(delivery) ?? DeliveryResult.busy(5),
@@ -139,10 +139,10 @@ export async function main() {
         if (shuttingDown)
             return;
         // Go has now protected this directory with POSIX modes / a Windows DACL.
-        inbox = new TodayAIInbox(resolve(stateDir, "today-ai-inbox.sqlite"));
+        inbox = new ReferenceInbox(resolve(stateDir, "reference-agent-inbox.sqlite"));
         await Promise.race([client.waitUntilRegistered(60_000), stopped]);
         if (!shuttingDown)
-            console.info("Today AI is connected; accepted Feed is in the durable inbox.");
+            console.info("Example Agent is connected; accepted Feed is in the durable inbox.");
         await Promise.race([stopped, client.waitUntilStopped()]);
         if (!shuttingDown)
             throw new Error("sdk_process_stopped");
@@ -166,7 +166,7 @@ function isEntrypoint() {
 }
 if (isEntrypoint()) {
     main().catch(() => {
-        console.error("Today AI SDK stopped; inspect private configuration and local state.");
+        console.error("Example Agent SDK stopped; inspect private configuration and local state.");
         process.exitCode = 1;
     });
 }

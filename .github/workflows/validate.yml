@@ -13,7 +13,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - run: node --check examples/typescript/today-ai.mjs
+      - run: node --check examples/typescript/reference-agent.mjs
       - run: python -m compileall -q examples
       - run: python -m json.tool examples/context.json > /dev/null
       - run: git diff --check

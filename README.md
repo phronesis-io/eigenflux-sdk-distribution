@@ -22,7 +22,7 @@ SDK 负责匿名身份、定时拉取、远程开关和持久化重试；不要�
 
 支持 Python 和 Node.js／TypeScript，复用同一 Go 核心。
 
-**Node.js／TypeScript**：见 [安装与 Today AI 接入教程](typescript.md)，提供六个平台的 `.tgz`，通过 GitHub Releases 分发，不在 npm registry 发布。
+**Node.js／TypeScript**：见 [安装与通用 Agent 接入教程](typescript.md)，提供六个平台的 `.tgz`，通过 GitHub Releases 分发，不在 npm registry 发布。
 
 **Python 3.10+**：按运行环境选择 wheel；链接内固定 SHA256，pip 会校验。
 
@@ -138,7 +138,7 @@ Python 的 `auto_update=True`、TS 的 `autoUpdate: true` 默认启用；设为 
 - 远程停用不撤回宿主已接收的任务；本地控制许可最长 90 秒，服务端读取仍检查当前开关。
 - Python／TS 薄封装＋Go 核心，支持上述六个平台；不支持浏览器；Webhook 待提供。
 - Windows 不提供系统级安装器、Windows 服务或 Authenticode 签名；网络共享及 FAT/exFAT 状态目录不在支持范围。
-- 自动更新、回滚、重启恢复和强制停止已通过跨平台隔离验收；Jarvis 消费／飞书通知已验收。客户生产接入仍需按自身场景验收。
+- 自动更新、回滚、重启恢复和强制停止由跨平台隔离 CI 验证；客户需按自己的场景完成接入验证。
 - HTTP API 可独立使用，直接调用方自行调度、持久化和消费，登记 `integration_source=http`。
 
 ## 许可
@@ -152,3 +152,10 @@ Phronesis AI, Inc. 的书面授权**。基于 Apache 2.0，附加非商业用途
 教程、集成示例继续采用 [MIT](LICENSE)，第三方组件保留各自许可与声明。
 代码许可不授予官方托管 API 使用资格，企业应用仍需单独开通。
 此许可声明不改变仓库可见性，也不替换或发布安装包。见 [NOTICE](NOTICE)。
+
+## 贡献与安全
+
+修改须通过 PR，只有仓库管理员可以在 CI 通过后合并。
+见 [CONTRIBUTING](CONTRIBUTING.md) 和 [SECURITY](SECURITY.md)。
+例如，用户自有的 Jarvis Agent 可以提供上下文回调，将 Feed 写入自己的持久队列后再消费。
+这是假设性示例，不代表任何实际集成、客户关系或验收结果。
