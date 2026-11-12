@@ -1,11 +1,11 @@
-/** MIT-licensed host integration. SDK implementation and binaries are proprietary. */
-import { chmodSync, readFileSync, realpathSync } from "node:fs";
-import { dirname, resolve } from "node:path";
+/** MIT-licensed host integration. SDK use is governed by the accompanying noncommercial license. */
+import { chmodSync, existsSync, readFileSync, realpathSync, writeFileSync } from "node:fs";
+import { resolve } from "node:path";
 import { DatabaseSync } from "node:sqlite";
 import { fileURLToPath } from "node:url";
 import { Client, DeliveryResult } from "@phronesis-io/eigenflux-sdk";
-/** Replace this inbox with Today AI's durable queue when integrating its Agent. */
-export class TodayAIInbox {
+/** Replace this inbox with the host Agent's durable queue. */
+export class ReferenceInbox {
     database;
     tainted = false;
     constructor(path) {
@@ -55,7 +55,7 @@ export class TodayAIInbox {
                 transaction = false;
                 return DeliveryResult.busy(5);
             }
-            const receipt = `today-ai:${delivery.batchId}`;
+            const receipt = `reference-agent:${delivery.batchId}`;
             this.database.prepare("INSERT INTO batches VALUES(?,?,?,?)").run(delivery.batchId, String(delivery.sequence), receipt, JSON.stringify(delivery.feed));
             const insert = this.database.prepare("INSERT OR IGNORE INTO items VALUES(?,?,?)");
             for (const item of delivery.items) {
@@ -101,14 +101,47 @@ export class TodayAIInbox {
     }
     close() { this.database.close(); }
 }
+/** Host-owned storage identity. Never guess a different file after an upgrade. */
+export function openReceiptStore(stateDir, inboxFile, stateExisted) {
+    const binding = resolve(stateDir, "host-receipt-store.json");
+    if (stateExisted && !existsSync(inboxFile))
+        throw new Error("existing_receipt_store_required");
+    const path = existsSync(inboxFile) ? realpathSync(inboxFile) : resolve(inboxFile);
+    if (existsSync(binding)) {
+        const saved = JSON.parse(readFileSync(binding, "utf8"));
+        if (saved.schema !== 1 || saved.path !== path)
+            throw new Error("receipt_store_binding_mismatch");
+    }
+    const store = new ReferenceInbox(inboxFile);
+    try {
+        if (!existsSync(binding)) {
+            writeFileSync(binding, JSON.stringify({ schema: 1, path: realpathSync(inboxFile) }), { mode: 0o600, flag: "wx" });
+        }
+        return store;
+    }
+    catch (error) {
+        store.close();
+        throw error;
+    }
+}
 export async function main() {
-    const baseUrl = process.env.EIGENFLUX_BASE_URL;
-    const appCredential = process.env.EIGENFLUX_APP_CREDENTIAL;
-    if (!baseUrl || !appCredential)
-        throw new Error("private_application_configuration_required");
-    const contextFile = process.env.TODAY_AI_CONTEXT_FILE
-        ?? resolve(dirname(fileURLToPath(import.meta.url)), "context.json");
-    const stateDir = resolve(process.env.TODAY_AI_STATE_DIR ?? "data/today-ai-sdk");
+    const required = (name) => {
+        const value = process.env[name]?.trim();
+        if (!value)
+            throw new Error("explicit_agent_configuration_required");
+        return value;
+    };
+    const baseUrl = required("EIGENFLUX_BASE_URL");
+    const appCredential = required("EIGENFLUX_APP_CREDENTIAL");
+    const contextFile = resolve(required("EXAMPLE_AGENT_CONTEXT_FILE"));
+    const stateDir = resolve(required("EXAMPLE_AGENT_STATE_DIR"));
+    const inboxFile = resolve(required("EXAMPLE_AGENT_INBOX_FILE"));
+    const externalAgentId = required("EXAMPLE_AGENT_ID");
+    const runtimeName = required("EXAMPLE_AGENT_PRODUCT_NAME");
+    const runtimeVersion = required("EXAMPLE_AGENT_PRODUCT_VERSION");
+    const stateExisted = existsSync(resolve(stateDir, "state.json"));
+    if (stateExisted && !existsSync(inboxFile))
+        throw new Error("existing_receipt_store_required");
     let inbox;
     let finish;
     const stopped = new Promise((done) => { finish = done; });
@@ -117,11 +150,11 @@ export async function main() {
     const client = new Client({
         baseUrl,
         appCredential,
-        externalAgentId: process.env.TODAY_AI_AGENT_ID ?? "today-ai-agent-001",
-        runtimeName: "today-ai",
-        runtimeVersion: process.env.TODAY_AI_PRODUCT_VERSION ?? "unknown",
+        externalAgentId,
+        runtimeName,
+        runtimeVersion,
         stateDir,
-        feedPollIntervalSeconds: Number(process.env.TODAY_AI_POLL_SECONDS ?? "3600"),
+        feedPollIntervalSeconds: Number(process.env.EXAMPLE_AGENT_POLL_SECONDS ?? "3600"),
         autoUpdate: true,
         contextProvider: () => JSON.parse(readFileSync(contextFile, "utf8")),
         pushToAgent: (delivery) => inbox?.accept(delivery) ?? DeliveryResult.busy(5),
@@ -139,10 +172,10 @@ export async function main() {
         if (shuttingDown)
             return;
         // Go has now protected this directory with POSIX modes / a Windows DACL.
-        inbox = new TodayAIInbox(resolve(stateDir, "today-ai-inbox.sqlite"));
+        inbox = openReceiptStore(stateDir, inboxFile, stateExisted);
         await Promise.race([client.waitUntilRegistered(60_000), stopped]);
         if (!shuttingDown)
-            console.info("Today AI is connected; accepted Feed is in the durable inbox.");
+            console.info("Example Agent is connected; accepted Feed is in the durable inbox.");
         await Promise.race([stopped, client.waitUntilStopped()]);
         if (!shuttingDown)
             throw new Error("sdk_process_stopped");
@@ -166,7 +199,7 @@ function isEntrypoint() {
 }
 if (isEntrypoint()) {
     main().catch(() => {
-        console.error("Today AI SDK stopped; inspect private configuration and local state.");
+        console.error("Example Agent SDK stopped; inspect private configuration and local state.");
         process.exitCode = 1;
     });
 }
